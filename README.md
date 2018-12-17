@@ -2,7 +2,7 @@ My Solution for Kaggle's Airbnb New User Bookings Challenge.
 
 data.rar must be extracted before running any of the scripts.
  
- 
+```
 ├───data
 │   ├───processed
 │   │       all_users_processed_data.csv
@@ -41,4 +41,4 @@ data.rar must be extracted before running any of the scripts.
     │
     └───models
             train_predict_model.py
-
+```
