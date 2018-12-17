@@ -4,16 +4,16 @@ import numpy as np
 import os
 from datetime import datetime, timedelta
 
+processed_data_path = os.path.join(os.path.pardir, 'data', 'processed')
+raw_data_path = os.path.join(os.path.pardir, 'data', 'raw')
 
 def read_data(filename):
-    raw_data_path = os.path.join(os.path.pardir, 'data', 'raw')
     # Read File and Store its Content in Dataframe
     file_ = os.path.join(raw_data_path, filename)
     df_ = pd.read_csv(file_)
     return df_
 
 def write_data(df_, filename):
-    processed_data_path = os.path.join(os.path.pardir, 'data', 'processed')
     # Write DataFrame Content in File
     file_ = os.path.join(processed_data_path, filename)
     df_.to_csv(file_, index=False)
@@ -135,7 +135,7 @@ def preprocess_raw_data():
     #The next step took 6 hours running on 4Core Pc
     #user_actions = process_sessions(sessions_df) #It needs optimization, till done, the output file is made available in \data
     #write_data(user_actions,'users_actions.csv' )
-    users_actions_df =  pd.read_csv(os.path.join(raw_data_path, 'users_actions.csv'))
+    users_actions_df =  pd.read_csv(os.path.join(processed_data_path, 'users_actions.csv'))
     all_users_data = prepare_user_data(data_df, users_actions_df)
     write_data(all_users_data, 'all_users_processed_data.csv')
     processed_train_df = all_users_data[:len(train_df)]
