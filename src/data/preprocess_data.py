@@ -24,6 +24,7 @@ def write_data(df_, filename):
     df_.to_csv(file_, index=False)
 
 def prepare_train_test_data(train_df, test_df):
+    print("Preprocess Data: prepare_train_test_data Started")
     #Convert Date/Time Fields from object to datetime
     # In train, convert date_account_created,timestamp_first_active,date_first_booking
     train_df['date_account_created'] = pd.to_datetime(train_df['date_account_created'])
@@ -46,6 +47,7 @@ def prepare_train_test_data(train_df, test_df):
 
 
 def impute_users_data(data_df):
+    print("Preprocess Data: impute_users_data Started")
     # Drop 1st booking date
     data_df = data_df.drop(columns=['date_first_booking'])
     # Imputer Age column outliers
@@ -84,6 +86,7 @@ def impute_users_data(data_df):
 
 # This method is to be optimized
 def process_sessions(sessions_df):
+    print("Preprocess Data: process_sessions Started")
     # Processing seemingly unnecessary columns
     sessions_df = sessions_df.drop(columns=['action_type', 'action_detail', 'secs_elapsed', 'device_type'])
     # Process sessions_df so that each user has one row showing all his behaviour
@@ -105,20 +108,24 @@ def process_sessions(sessions_df):
     return df_
 
 def prepare_user_data(data_df, users_actions_df):
+    print("Preprocess Data: prepare_user_data Started")
     # Merge data_df & users_action_df so that each user has 1 row showing info & behaviour
     check_user_session = pd.merge(data_df, users_actions_df, on='id', how='left')
     # Fill missings columns with 0 since session data were not available for all users
     check_user_session.fillna(0, inplace=True)
     # Encode all categorical data using one-hot-encoding
     check_user_session_encoded = pd.get_dummies(check_user_session,
-                                                columns={'signup_method', 'signup_flow', 'language', 'signup_app',
+                                                columns=['signup_method', 'signup_flow', 'language', 'signup_app',
                                                          'first_device_type', 'first_browser', 'season_accnt_crtd',
                                                          'affiliate_channel', 'first_affiliate_tracked',
-                                                         'affiliate_provider'})
+                                                         'affiliate_provider'])
+    check_user_session_encoded['session_known'] = 0
+    check_user_session_encoded.loc[check_user_session_encoded['id'].isin(users_actions_df.id), 'session_known'] = 1
     return check_user_session_encoded
 
 
 def process_target(country_destination):
+    print("Preprocess Data: process_target Started")
     # Encode target variable
     factor = pd.factorize(country_destination)
     processed_y = pd.DataFrame(columns=['country_destination'])
@@ -131,6 +138,7 @@ def process_target(country_destination):
     write_data(processed_y_mapping, 'target_data_mapping.csv')
 
 def preprocess_raw_data():
+    print("Preprocess Data: preprocess_raw_data Started")
     train_df = read_data('train_users_2.csv')
     test_df = read_data('test_users.csv')
     data_df, country_destination = prepare_train_test_data(train_df, test_df)
@@ -150,6 +158,6 @@ def preprocess_raw_data():
     process_target(country_destination)
 
 if __name__ == '__main__':
-    print("hi")
+    print("Preprocess Data: Main Started")
     preprocess_raw_data()
-    print("bye")
+    print("Preprocess Data: Main Ended")
