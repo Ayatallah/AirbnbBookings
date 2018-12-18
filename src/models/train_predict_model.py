@@ -6,10 +6,9 @@ from sklearn.model_selection import train_test_split
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
-
+processed_data_path = os.path.join(os.path.pardir, 'data', 'processed')
 def read_data(filename):
     # Read File and Store its Content in Dataframe
-    processed_data_path = os.path.join(os.path.pardir, 'data', 'processed')
     file_ = os.path.join(processed_data_path, filename)
     df_ = pd.read_csv(file_)
     return df_
