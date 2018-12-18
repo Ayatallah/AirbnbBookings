@@ -2,10 +2,15 @@
 import pandas as pd
 import numpy as np
 import os
+import inspect
 from datetime import datetime, timedelta
 
-processed_data_path = os.path.join(os.path.pardir, 'data', 'processed')
-raw_data_path = os.path.join(os.path.pardir, 'data', 'raw')
+base_file_path = inspect.getframeinfo(inspect.currentframe()).filename
+base_path = os.path.dirname(os.path.abspath(base_file_path))
+project_dir_path = os.path.join(base_path, '../..')
+
+processed_data_path = os.path.join(project_dir_path, 'data', 'processed')
+raw_data_path = os.path.join(project_dir_path, 'data', 'raw')
 
 def read_data(filename):
     # Read File and Store its Content in Dataframe
