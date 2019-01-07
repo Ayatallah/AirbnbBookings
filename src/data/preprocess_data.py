@@ -37,13 +37,15 @@ def prepare_train_test_data(train_df, test_df):
     test_df['date_account_created'] = pd.to_datetime(test_df['date_account_created'])
     # Drop row where user signed up after first booking, only 29 rows
     train_df = train_df.drop(train_df[train_df['date_first_booking'] < train_df['date_account_created']].index)
+    #print(len(train_df))
     # Extract Target value
     country_destination = train_df['country_destination']
     # Drop Target value
-    train_users_df = train_df.drop(columns=['country_destination'])
+    train_df = train_df.drop(columns=['country_destination'])
     # Concatenating train and test dfs to manipulate same columns all at once
-    data_df = pd.concat([train_df, train_df], ignore_index=True)
-    return data_df, country_destination
+    data_df = pd.concat([train_df, test_df], ignore_index=True)
+    #print(data_df.info())
+    return data_df, country_destination, train_df
 
 
 def impute_users_data(data_df):
@@ -60,6 +62,7 @@ def impute_users_data(data_df):
     # Introduce season_accnt_crtd field holding data about seasons when accounts were created
     data_df.loc[:, ('season_accnt_crtd')] = ""
     for i in range(275518):
+        print("impute "+str(i))
         month = int(data_df['date_account_created'][i].strftime("%m"))
         if (month == 1 or month == 2 or month == 12):
             data_df.loc[i, ('season_accnt_crtd')] = "winter"
@@ -81,6 +84,7 @@ def impute_users_data(data_df):
     # Encode Gender based on male or not(male-female)
     data_df['is_male'] = 0
     data_df.loc[data_df.gender == "MALE", ['is_male']] = 1
+    data_df = data_df.drop(columns=['gender'])
     #writee to data_users_file = os.path.join(raw_data_path, 'data_users.csv')
     return data_df
 
@@ -99,9 +103,9 @@ def process_sessions(sessions_df):
     df_.id = users_have_session
     df_.fillna(0, inplace=True)
     for i in range(len(users_have_session)):
+        print("sessions "+str(i))
         user_actions = s_group.get_group(str(users_have_session[i])).action.unique().tolist()
         user_actions = [x for x in user_actions if str(x) != 'nan']
-        print(i)
         for k in range(len(user_actions)):
             action_count = s_group.get_group(users_have_session[i]).action.value_counts()[str(user_actions[k])]
             df_.loc[df_['id']==users_have_session[i], [user_actions[k]]] = action_count
@@ -141,16 +145,17 @@ def preprocess_raw_data():
     print("Preprocess Data: preprocess_raw_data Started")
     train_df = read_data('train_users_2.csv')
     test_df = read_data('test_users.csv')
-    data_df, country_destination = prepare_train_test_data(train_df, test_df)
+    data_df, country_destination, train_df = prepare_train_test_data(train_df, test_df)
     data_df = impute_users_data(data_df)
     write_data(data_df, 'data_users.csv')
-    #sessions_df = read_data('sessions.csv')
+    sessions_df = read_data('sessions.csv')
     #The next step took 6 hours running on 4Core Pc
-    #user_actions = process_sessions(sessions_df) #It needs optimization, till done, the output file is made available in \data
-    #write_data(user_actions,'users_actions.csv' )
+    user_actions = process_sessions(sessions_df) #It needs optimization, till done, the output file is made available in \data
+    write_data(user_actions,'users_actions.csv' )
     users_actions_df =  pd.read_csv(os.path.join(processed_data_path, 'users_actions.csv'))
     all_users_data = prepare_user_data(data_df, users_actions_df)
     write_data(all_users_data, 'all_users_processed_data.csv')
+    ##here is the problem, debugged
     processed_train_df = all_users_data[:len(train_df)]
     processed_test_df = all_users_data[len(train_df):]
     write_data(processed_train_df, 'train_users.csv')
