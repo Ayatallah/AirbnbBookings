@@ -1,4 +1,4 @@
-My Solution for Kaggle's Airbnb New User Bookings Challenge.
+Practice attempts to predict destination for new users on Airbnb using Kaggle's Airbnb New User Bookings Dataset.
 
 data.rar must be extracted before running any of the scripts.
  
